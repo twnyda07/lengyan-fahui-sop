@@ -174,6 +174,27 @@
   .rn-line:last-child{border-bottom:0}
   .rn-line .rl{display:inline-block;background:#f6e3c4;color:#7a5a12;border:1px solid var(--gold-soft);padding:1px 9px;border-radius:7px;margin-right:6px;font-size:13px}
   .rn-warn{font-size:13.5px;color:#8a3a12;background:#fbeee0;border:1px solid #eec7ad;border-radius:8px;padding:8px 12px;margin-top:8px}
+  /* 全組時間表 matrix */
+  .mtx-hint{font-size:13px;color:var(--gold);font-weight:700;margin-left:6px}
+  .matrix-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
+  table.mtx{border-collapse:separate;border-spacing:0;background:var(--paper);min-width:1240px}
+  table.mtx th,table.mtx td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top}
+  table.mtx thead th{position:sticky;top:0;z-index:5;color:#fff;font-size:14.5px;font-weight:800;padding:11px 12px;text-align:left;white-space:nowrap}
+  table.mtx th.corner{position:sticky;left:0;top:0;z-index:7;background:#3a2140;min-width:120px}
+  table.mtx th.rowh{position:sticky;left:0;z-index:4;background:#faf4e6;min-width:120px;max-width:140px;font-size:14px;color:var(--plum);font-weight:800;padding:10px 11px;text-align:left}
+  table.mtx th.rowh .codebadge{width:22px;height:22px;font-size:12px;border-radius:6px;margin-right:5px;vertical-align:middle}
+  table.mtx td{padding:9px 12px;min-width:235px;max-width:290px}
+  table.mtx tbody tr:hover td{background:#fdf9f0}
+  .ph0h{background:linear-gradient(90deg,#5a6a2b,#7a8a3a)}
+  .ph1h{background:linear-gradient(90deg,#2b5a86,#3a72a6)}
+  .ph2h{background:linear-gradient(90deg,#7a1f2b,#a83644)}
+  .ph3h{background:linear-gradient(90deg,#8a5a12,#b8860b)}
+  .ph4h{background:linear-gradient(90deg,#4a2545,#6c3a63)}
+  .ph5h{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
+  .mtk{font-size:13px;padding:4px 0;border-bottom:1px dashed var(--line);line-height:1.55}
+  .mtk:last-child{border-bottom:0}
+  .mtk .mt{display:inline-block;color:var(--maroon);font-weight:700;margin-right:5px}
+  .mnone{color:#cabfa6}
 </style>
 </head>
 <body>
@@ -189,6 +210,7 @@
   <div class="wrap">
     <button data-tab="overview" class="active">總覽 · 組織</button>
     <button data-tab="timeline">主時間軸 Workflow</button>
+    <button data-tab="matrix">全組時間表</button>
     <button data-tab="handoff">跨組串連矩陣</button>
     <button data-tab="notify">知會協定</button>
     <button data-tab="coop">壇口協作</button>
@@ -200,6 +222,7 @@
 <div class="wrap">
   <section class="tab active" id="overview"></section>
   <section class="tab" id="timeline"></section>
+  <section class="tab" id="matrix"></section>
   <section class="tab" id="handoff"></section>
   <section class="tab" id="notify"></section>
   <section class="tab" id="coop"></section>
@@ -225,7 +248,7 @@ function boot(){
   chips.push(`<span class="chip">🔒 <b>職稱代號版</b></span>`);
   $('#cmdline').innerHTML = chips.join('');
 
-  renderOverview(); renderTimeline(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels();
+  renderOverview(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels();
   $('#foot').innerHTML = `寶嚴國際佛學研修院／寶嚴禪寺　·　${esc((D.event&&D.event.name)||'楞嚴神奇大法會')} 工作SOP（職稱代號版）　·　資料來源：寶嚴流程表（執事人員組織總表＋法會排程規劃表）　·　人員分工與細節請以總指揮中心最新公告為準`;
 
   // tabs
@@ -294,6 +317,38 @@ function renderTimeline(){
 }
 
 function groupNames(){return (D.departments||[]).map(d=>d.name);}
+
+function phaseOrder(){
+  const order=['籌備','入場場佈','法會進行','三皈','圓滿','檢討'];
+  const set=[];
+  (D.departments||[]).forEach(d=>(d.phases||[]).forEach(p=>{ if(!set.includes(p.phase)) set.push(p.phase); }));
+  return set.sort((a,b)=>{
+    const ai=order.findIndex(o=>a.includes(o)), bi=order.findIndex(o=>b.includes(o));
+    return (ai<0?99:ai)-(bi<0?99:bi);
+  });
+}
+function renderMatrix(){
+  const s=$('#matrix'); const ds=D.departments||[]; const phases=phaseOrder();
+  const shortP = p => p.replace(/（[^）]*）|\([^)]*\)/g,'').trim();
+  let h=`<h2 class="sec">全組時間表 · 各組依時間軸要做的事</h2><p class="lead">直向是 15 個工作組，橫向是六個階段（時間）。每一格＝該組在那個時間要做的事。<span class="mtx-hint">← 手機可左右滑動看各階段 →</span></p>`;
+  h+=`<div class="matrix-wrap"><table class="mtx"><thead><tr><th class="corner">組別 ＼ 階段</th>`;
+  phases.forEach((p,i)=>{ h+=`<th class="ph${i%6}h">${esc(shortP(p))}</th>`; });
+  h+=`</tr></thead><tbody>`;
+  ds.forEach(d=>{
+    h+=`<tr><th class="rowh"><span class="codebadge">${esc(d.code||'')}</span>${esc(d.name)}</th>`;
+    phases.forEach(p=>{
+      const ph=(d.phases||[]).find(x=>x.phase===p);
+      const tasks=(ph&&ph.tasks)||[];
+      const cell = tasks.length
+        ? tasks.map(t=>`<div class="mtk"><span class="mt">${esc(t.time)}</span>${esc(t.task)}</div>`).join('')
+        : `<span class="mnone">—</span>`;
+      h+=`<td>${cell}</td>`;
+    });
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  s.innerHTML=h;
+}
 
 function renderHandoff(){
   const s=$('#handoff'); const rows=(D.coordination&&D.coordination.handoffMatrix)||[];
