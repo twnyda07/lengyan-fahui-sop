@@ -83,11 +83,12 @@
   .phase-head .idx{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-weight:800}
   .phase-head h3{margin:0;font-size:20px;flex:1}
   .phase-head .win{font-size:14px;opacity:.9}
-  .p0 .phase-head{background:linear-gradient(90deg,#2b5a86,#3a72a6)}
-  .p1 .phase-head{background:linear-gradient(90deg,#7a1f2b,#a83644)}
-  .p2 .phase-head{background:linear-gradient(90deg,#8a5a12,#b8860b)}
-  .p3 .phase-head{background:linear-gradient(90deg,#4a2545,#6c3a63)}
-  .p4 .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
+  .p0 .phase-head{background:linear-gradient(90deg,#5a6a2b,#7a8a3a)}
+  .p1 .phase-head{background:linear-gradient(90deg,#2b5a86,#3a72a6)}
+  .p2 .phase-head{background:linear-gradient(90deg,#7a1f2b,#a83644)}
+  .p3 .phase-head{background:linear-gradient(90deg,#8a5a12,#b8860b)}
+  .p4 .phase-head{background:linear-gradient(90deg,#4a2545,#6c3a63)}
+  .p5 .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
   .mile{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:12px 18px;border-top:1px dashed var(--line)}
   .mile .t{font-weight:800;color:var(--maroon);font-size:15px}
   .mile .ev{font-size:16px}
@@ -280,9 +281,9 @@ function renderOverview(){
 
 function renderTimeline(){
   const s=$('#timeline'); const tl=(D.coordination&&D.coordination.masterTimeline)||[];
-  let h=`<h2 class="sec">主時間軸 · 全場 Workflow</h2><p class="lead">五階段一棒接一棒：每個里程碑標示 <span style="color:#7a5a12">主責組</span> 與 <span style="color:#3f6a52">協作組</span>。</p><div class="phase-track">`;
+  let h=`<h2 class="sec">主時間軸 · 全場 Workflow</h2><p class="lead">從活動前約2個月的籌備，到圓滿撤場，全程一棒接一棒：每個里程碑標示 <span style="color:#7a5a12">主責組</span> 與 <span style="color:#3f6a52">協作組</span>。</p><div class="phase-track">`;
   tl.forEach((p,i)=>{
-    h+=`<div class="phase p${i%5}"><div class="phase-head"><div class="idx">${i+1}</div><h3>${esc(p.phase)}</h3><div class="win">${esc(p.window||'')}</div></div>`;
+    h+=`<div class="phase p${i%6}"><div class="phase-head"><div class="idx">${i+1}</div><h3>${esc(p.phase)}</h3><div class="win">${esc(p.window||'')}</div></div>`;
     (p.milestones||[]).forEach(m=>{
       const sup=(m.supportGroups||[]).map(g=>`<span class="sup">${esc(g)}</span>`).join('');
       h+=`<div class="mile"><div class="t">${esc(m.time||'')}</div><div><div class="ev">${esc(m.event||'')}</div><div class="roles"><span class="lead">主 ${esc(m.leadGroup||'')}</span>${sup}</div></div></div>`;
@@ -359,7 +360,7 @@ function renderCoop(){
 
 function renderDepts(){
   const s=$('#depts'); const ds=D.departments||[];
-  let h=`<h2 class="sec">各組 SOP</h2><p class="lead">點開每一組，看五階段任務、需別組先給(進)、要交付別組(出)、風險對策、檢核清單、KPI。</p>`;
+  let h=`<h2 class="sec">各組 SOP</h2><p class="lead">點開每一組，看六階段任務（籌備期→入場場佈→法會→受戒→撤場→結案）、需別組先給(進)、要交付別組(出)、風險對策、檢核清單、KPI。</p>`;
   h+=`<div class="toolbar"><input id="dSearch" placeholder="搜尋部門 / 任務關鍵字…"><button onclick="document.querySelectorAll('#depts .acc').forEach(a=>a.classList.add('open'))" style="font-family:inherit;font-size:15px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer">全部展開</button><button onclick="document.querySelectorAll('#depts .acc').forEach(a=>a.classList.remove('open'))" style="font-family:inherit;font-size:15px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer">全部收合</button></div>`;
   h+=`<div id="dList"></div>`;
   s.innerHTML=h;
@@ -371,7 +372,7 @@ function renderDepts(){
     let inner=`<div class="acc-h">${badge}<h3>${esc(d.name)}</h3><span class="mm">${esc(d.mission||'')}</span><span class="caret">▸</span></div><div class="acc-body">`;
     inner+=`<div class="meta" style="margin-top:12px">執事：組長・指導法師・各小組長（名單以總指揮中心私版為準）　｜　下轄：${(d.subgroups||[]).join('、')}</div>`;
     // phases
-    inner+=`<div class="box" style="margin-top:12px"><h4>五階段任務</h4>`;
+    inner+=`<div class="box" style="margin-top:12px"><h4>六階段任務</h4>`;
     (d.phases||[]).forEach(p=>{
       inner+=`<div class="phase-mini"><div class="pm-h">${esc(p.phase)}</div>`;
       (p.tasks||[]).forEach(t=>{inner+=`<div class="tk"><span class="tkt">${esc(t.time)}</span><span>${esc(t.task)}${t.owner?` <span class="tko">〔${esc(t.owner)}〕</span>`:''}</span></div>`;});
