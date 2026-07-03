@@ -195,6 +195,13 @@
   .mtk:last-child{border-bottom:0}
   .mtk .mt{display:inline-block;color:var(--maroon);font-weight:700;margin-right:5px}
   .mnone{color:#cabfa6}
+  /* 自動列點 / 有序步驟 */
+  ul.bl{margin:3px 0 2px;padding-left:1.15em;list-style:disc}
+  ul.bl li{margin:3px 0}
+  ul.bl li::marker{color:var(--gold)}
+  ol.steps{margin:3px 0 2px;padding-left:1.4em}
+  ol.steps li{margin:4px 0;padding-left:2px}
+  ol.steps li::marker{color:var(--gold);font-weight:800}
 </style>
 </head>
 <body>
@@ -237,6 +244,26 @@ const D = window.SOP_DATA;
 const $ = (s,el=document)=>el.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const el = (tag,cls,html)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;};
+const _split=(t,re)=>t.split(re).map(x=>x.trim()).filter(Boolean);
+// 把長句自動拆成列點：優先編號(1. 2.)，其次分號/句號；純箭頭流程→有序步驟
+function bul(text){
+  let t=String(text==null?'':text).trim(); if(!t) return '';
+  const numRe=/(?:^|[\s、，；：:])\d{1,2}[.、)](?=\D)/g;
+  let items;
+  if((t.match(numRe)||[]).length>=2) items=_split(t,numRe);
+  else items=_split(t,/[；;]|。(?=.)/);
+  if(items.length>=2) return '<ul class="bl">'+items.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>';
+  if((t.match(/→/g)||[]).length>=2 && !/[（）()]/.test(t))
+    return '<ol class="steps">'+_split(t,/→/).map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+  return esc(t);
+}
+// 流程（壇口協作）：箭頭一律拆成有序步驟
+function bulFlow(text){
+  let t=String(text==null?'':text).trim(); if(!t) return '';
+  const steps=_split(t,/→/);
+  if(steps.length>=2) return '<ol class="steps">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
+  return bul(t);
+}
 
 function boot(){
   if(!D){document.querySelectorAll('.tab').forEach(t=>t.innerHTML='<div class="loading">資料尚未載入（data.js）</div>');return;}
@@ -293,7 +320,7 @@ function renderOverview(){
   (D.departments||[]).forEach(d=>{
     const badge = d.code ? `<span class="codebadge">${esc(d.code)}</span>` : `<span class="dot"></span>`;
     h += `<div class="card"><div class="dept-h">${badge}<h3>${esc(d.name)}</h3></div>`;
-    if(d.mission) h += `<div class="meta">${esc(d.mission)}</div>`;
+    if(d.mission) h += `<div class="meta">${bul(d.mission)}</div>`;
     if(d.subgroups?.length) h += `<div class="tags">`+d.subgroups.slice(0,14).map(g=>`<span class="tag">${esc(g)}</span>`).join('')+`</div>`;
     h += `</div>`;
   });
@@ -309,7 +336,7 @@ function renderTimeline(){
     h+=`<div class="phase p${i%6}"><div class="phase-head"><div class="idx">${i+1}</div><h3>${esc(p.phase)}</h3><div class="win">${esc(p.window||'')}</div></div>`;
     (p.milestones||[]).forEach(m=>{
       const sup=(m.supportGroups||[]).map(g=>`<span class="sup">${esc(g)}</span>`).join('');
-      h+=`<div class="mile"><div class="t">${esc(m.time||'')}</div><div><div class="ev">${esc(m.event||'')}</div><div class="roles"><span class="lead">主 ${esc(m.leadGroup||'')}</span>${sup}</div></div></div>`;
+      h+=`<div class="mile"><div class="t">${esc(m.time||'')}</div><div><div class="ev">${bul(m.event||'')}</div><div class="roles"><span class="lead">主 ${esc(m.leadGroup||'')}</span>${sup}</div></div></div>`;
     });
     h+=`</div>`;
   });
@@ -340,7 +367,7 @@ function renderMatrix(){
       const ph=(d.phases||[]).find(x=>x.phase===p);
       const tasks=(ph&&ph.tasks)||[];
       const cell = tasks.length
-        ? tasks.map(t=>`<div class="mtk"><span class="mt">${esc(t.time)}</span>${esc(t.task)}</div>`).join('')
+        ? tasks.map(t=>`<div class="mtk"><span class="mt">${esc(t.time)}</span>${bul(t.task)}</div>`).join('')
         : `<span class="mnone">—</span>`;
       h+=`<td>${cell}</td>`;
     });
@@ -368,7 +395,7 @@ function renderHandoff(){
     list.forEach(r=>{
       body.appendChild(el('div','hcard',
         `<div class="flow"><span class="pill from-p">${esc(r.from)}</span><span class="flow-arrow">→</span><span class="pill to-p">${esc(r.to)}</span></div>`+
-        `<div class="art">${esc(r.artifact)}</div>`+
+        `<div class="art">${bul(r.artifact)}</div>`+
         `<div class="row"><span class="lbl">觸發</span><span>${esc(r.trigger)}</span></div>`+
         `<div class="row"><span class="lbl">管道</span><span class="ch">${esc(r.channel)}</span></div>`+
         `<div class="row"><span class="lbl">期限</span><span><span class="sla-badge">${esc(r.deadline)}</span></span></div>`));
@@ -383,7 +410,7 @@ function renderNotify(){
   let h=`<h2 class="sec">即時知會協定</h2><p class="lead">法會當天什麼事一發生，誰要在多久內、用什麼管道通知誰。共 ${rows.length} 條。</p>`;
   h+=`<div class="hcards">`;
   rows.forEach(r=>{
-    h+=`<div class="hcard"><div class="ev">📢 ${esc(r.event)}</div>`+
+    h+=`<div class="hcard"><div class="ev">📢 ${bul(r.event)}</div>`+
       `<div class="flow"><span class="pill from-p">${esc(r.notifier)}</span><span class="flow-arrow">通知→</span><span class="pill to-p">${esc(r.audience)}</span></div>`+
       `<div class="row"><span class="lbl">管道</span><span class="ch">${esc(r.channel)}</span></div>`+
       `<div class="row"><span class="lbl">時效</span><span><span class="sla-badge">${esc(r.sla)}</span></span></div></div>`;
@@ -408,7 +435,7 @@ function renderCoop(){
   let h=`<h2 class="sec">壇口協作 · 關鍵時刻誰跟誰串</h2><p class="lead">內壇、獻供、普施、神鼓金剛藏王、三皈五戒、菩薩戒正授等時刻，多組如何同時上工、一棒接一棒。</p>`;
   rows.forEach(r=>{
     const gs=(r.groups||[]).map(g=>`<span class="tag">${esc(g)}</span>`).join('');
-    h+=`<div class="coop"><div class="mo">🪷 ${esc(r.moment)}</div><div class="gs tags">${gs}</div><div class="fl">${esc(r.flow)}</div></div>`;
+    h+=`<div class="coop"><div class="mo">🪷 ${esc(r.moment)}</div><div class="gs tags">${gs}</div><div class="fl">${bulFlow(r.flow)}</div></div>`;
   });
   s.innerHTML=h;
 }
@@ -430,14 +457,14 @@ function renderDepts(){
     inner+=`<div class="box" style="margin-top:12px"><h4>六階段任務</h4>`;
     (d.phases||[]).forEach(p=>{
       inner+=`<div class="phase-mini"><div class="pm-h">${esc(p.phase)}</div>`;
-      (p.tasks||[]).forEach(t=>{inner+=`<div class="tk"><span class="tkt">${esc(t.time)}</span><span>${esc(t.task)}${t.owner?` <span class="tko">〔${esc(t.owner)}〕</span>`:''}</span></div>`;});
+      (p.tasks||[]).forEach(t=>{inner+=`<div class="tk"><span class="tkt">${esc(t.time)}</span><span>${bul(t.task)}${t.owner?`<span class="tko">〔${esc(t.owner)}〕</span>`:''}</span></div>`;});
       inner+=`</div>`;
     });
     inner+=`</div>`;
     // io grid
     inner+=`<div class="sop-grid">`;
-    inner+=`<div class="box"><h4>◤ 需別組先給（進）</h4>`+((d.inbound||[]).map(x=>`<div class="io"><span class="pill from-p">${esc(x.from)}</span> <span class="flow-arrow">→</span> ${esc(x.what)}<div class="tko">${esc(x.when)} · ${esc(x.channel)}</div></div>`).join('')||'<div class="tko">—</div>')+`</div>`;
-    inner+=`<div class="box"><h4>◥ 要交付別組（出）</h4>`+((d.outbound||[]).map(x=>`<div class="io"><span class="flow-arrow">→</span> <span class="pill to-p">${esc(x.to)}</span> ${esc(x.what)}<div class="tko">${esc(x.when)} · ${esc(x.channel)}</div></div>`).join('')||'<div class="tko">—</div>')+`</div>`;
+    inner+=`<div class="box"><h4>◤ 需別組先給（進）</h4>`+((d.inbound||[]).map(x=>`<div class="io"><span class="pill from-p">${esc(x.from)}</span> <span class="flow-arrow">→</span> ${bul(x.what)}<div class="tko">${esc(x.when)} · ${esc(x.channel)}</div></div>`).join('')||'<div class="tko">—</div>')+`</div>`;
+    inner+=`<div class="box"><h4>◥ 要交付別組（出）</h4>`+((d.outbound||[]).map(x=>`<div class="io"><span class="flow-arrow">→</span> <span class="pill to-p">${esc(x.to)}</span> ${bul(x.what)}<div class="tko">${esc(x.when)} · ${esc(x.channel)}</div></div>`).join('')||'<div class="tko">—</div>')+`</div>`;
     inner+=`</div>`;
     // risks + checklist
     inner+=`<div class="sop-grid">`;
@@ -469,7 +496,7 @@ function renderChannels(){
     const icon = r.type==='無線電頻道'?'📻':r.type==='LINE群組'?'💬':'☁️';
     h+=`<div class="hcard"><div class="ev">${icon} ${esc(r.name)}</div>`+
       `<div style="margin-bottom:8px"><span class="ch-badge" style="color:${color};background:#f7f0e0">${esc(r.type)}</span></div>`+
-      `<div class="row"><span class="lbl">用途</span><span>${esc(r.purpose)}</span></div>`+
+      `<div class="row"><span class="lbl">用途</span><span>${bul(r.purpose)}</span></div>`+
       `<div class="row"><span class="lbl">成員</span><span class="ch">${esc(r.members)}</span></div></div>`;
   });
   h+=`</div>`;
