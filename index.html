@@ -202,6 +202,8 @@
   ol.steps{margin:3px 0 2px;padding-left:1.4em}
   ol.steps li{margin:4px 0;padding-left:2px}
   ol.steps li::marker{color:var(--gold);font-weight:800}
+  .fn-lead{font-weight:800;color:var(--plum);margin-bottom:5px;font-size:14.5px}
+  ul.fnbl{margin-top:2px}
 </style>
 </head>
 <body>
@@ -264,6 +266,26 @@ function bulFlow(text){
   if(steps.length>=2) return '<ol class="steps">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol>';
   return bul(t);
 }
+// 職掌/使命：冒號前為總述，冒號後的頓號清單拆成列點（末尾「下轄…小組」另處理）
+function fnBul(m){
+  let t=String(m==null?'':m).trim(); if(!t) return '';
+  t=t.replace(/(?:。|；)?\s*下轄[^。；]*?小組[^。；]*(?:。|；)?\s*$/,'').trim();
+  const ci=t.search(/[：:]/);
+  if(ci>=0){
+    const lead=t.slice(0,ci).trim(), body=t.slice(ci+1).trim();
+    const items=body.split(/[、；;。]/).map(x=>x.trim()).filter(Boolean);
+    if(items.length>=3)
+      return (lead?'<div class="fn-lead">'+esc(lead)+'</div>':'')+'<ul class="bl fnbl">'+items.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>';
+  }
+  return bul(t);
+}
+// 純頓號清單（如頻道成員）拆成列點
+function enumBul(text){
+  let t=String(text==null?'':text).trim(); if(!t) return '';
+  const items=t.split(/[、；;。]/).map(x=>x.trim()).filter(Boolean);
+  if(items.length>=2) return '<ul class="bl">'+items.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>';
+  return bul(t);
+}
 
 function boot(){
   if(!D){document.querySelectorAll('.tab').forEach(t=>t.innerHTML='<div class="loading">資料尚未載入（data.js）</div>');return;}
@@ -320,7 +342,7 @@ function renderOverview(){
   (D.departments||[]).forEach(d=>{
     const badge = d.code ? `<span class="codebadge">${esc(d.code)}</span>` : `<span class="dot"></span>`;
     h += `<div class="card"><div class="dept-h">${badge}<h3>${esc(d.name)}</h3></div>`;
-    if(d.mission) h += `<div class="meta">${bul(d.mission)}</div>`;
+    if(d.mission) h += `<div class="meta">${fnBul(d.mission)}</div>`;
     if(d.subgroups?.length) h += `<div class="tags">`+d.subgroups.slice(0,14).map(g=>`<span class="tag">${esc(g)}</span>`).join('')+`</div>`;
     h += `</div>`;
   });
@@ -451,8 +473,10 @@ function renderDepts(){
     const acc=el('div','acc');
     acc.dataset.txt = JSON.stringify(d);
     const badge = d.code ? `<span class="codebadge">${esc(d.code)}</span>` : `<span class="dot"></span>`;
-    let inner=`<div class="acc-h">${badge}<h3>${esc(d.name)}</h3><span class="mm">${esc(d.mission||'')}</span><span class="caret">▸</span></div><div class="acc-body">`;
-    inner+=`<div class="meta" style="margin-top:12px">執事：組長・指導法師・各小組長（名單以總指揮中心私版為準）　｜　下轄：${(d.subgroups||[]).join('、')}</div>`;
+    let inner=`<div class="acc-h">${badge}<h3>${esc(d.name)}</h3><span class="mm">${esc((d.mission||'').split(/[：:]/)[0])}</span><span class="caret">▸</span></div><div class="acc-body">`;
+    inner+=`<div class="meta" style="margin-top:12px">執事：組長・指導法師・各小組長（名單以總指揮中心私版為準）</div>`;
+    if(d.mission) inner+=`<div class="box" style="margin-top:12px"><h4>本組職掌</h4>${fnBul(d.mission)}</div>`;
+    if(d.subgroups&&d.subgroups.length) inner+=`<div class="box" style="margin-top:12px"><h4>下轄小組</h4><div class="tags">`+d.subgroups.map(g=>`<span class="tag">${esc(g)}</span>`).join('')+`</div></div>`;
     // phases
     inner+=`<div class="box" style="margin-top:12px"><h4>六階段任務</h4>`;
     (d.phases||[]).forEach(p=>{
@@ -497,7 +521,7 @@ function renderChannels(){
     h+=`<div class="hcard"><div class="ev">${icon} ${esc(r.name)}</div>`+
       `<div style="margin-bottom:8px"><span class="ch-badge" style="color:${color};background:#f7f0e0">${esc(r.type)}</span></div>`+
       `<div class="row"><span class="lbl">用途</span><span>${bul(r.purpose)}</span></div>`+
-      `<div class="row"><span class="lbl">成員</span><span class="ch">${esc(r.members)}</span></div></div>`;
+      `<div class="row"><span class="lbl">成員</span><span class="ch">${enumBul(r.members)}</span></div></div>`;
   });
   h+=`</div>`;
   s.innerHTML=h;
