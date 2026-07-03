@@ -204,6 +204,12 @@
   ol.steps li::marker{color:var(--gold);font-weight:800}
   .fn-lead{font-weight:800;color:var(--plum);margin-bottom:5px;font-size:14.5px}
   ul.fnbl{margin-top:2px}
+  /* 人力編制 / 衝突 */
+  .mp-list{margin-top:8px}
+  .mp-row{display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .mp-row:last-child{border-bottom:0}
+  .pid{display:inline-block;background:#3a2140;color:#f6e3c4;border-radius:6px;padding:1px 9px;font-weight:800;font-size:13.5px;letter-spacing:.5px}
+  .mp-role{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -225,6 +231,8 @@
     <button data-tab="coop">壇口協作</button>
     <button data-tab="depts">各組 SOP</button>
     <button data-tab="channels">通訊頻道</button>
+    <button data-tab="manpower">人力編制</button>
+    <button data-tab="conflict">人力衝突檢查</button>
   </div>
 </nav>
 
@@ -237,10 +245,13 @@
   <section class="tab" id="coop"></section>
   <section class="tab" id="depts"></section>
   <section class="tab" id="channels"></section>
+  <section class="tab" id="manpower"></section>
+  <section class="tab" id="conflict"></section>
   <div class="foot" id="foot"></div>
 </div>
 
 <script src="data.js"></script>
+<script src="manpower.js"></script>
 <script>
 const D = window.SOP_DATA;
 const $ = (s,el=document)=>el.querySelector(s);
@@ -297,7 +308,7 @@ function boot(){
   chips.push(`<span class="chip">🔒 <b>職稱代號版</b></span>`);
   $('#cmdline').innerHTML = chips.join('');
 
-  renderOverview(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels();
+  renderOverview(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels(); renderManpower(); renderConflict();
   $('#foot').innerHTML = `寶嚴國際佛學研修院／寶嚴禪寺　·　${esc((D.event&&D.event.name)||'楞嚴神奇大法會')} 工作SOP（職稱代號版）　·　資料來源：寶嚴流程表（執事人員組織總表＋法會排程規劃表）　·　人員分工與細節請以總指揮中心最新公告為準`;
 
   // tabs
@@ -527,6 +538,51 @@ function renderChannels(){
   s.innerHTML=h;
 }
 
+function renderManpower(){
+  const s=$('#manpower'); const M=window.MANPOWER;
+  if(!M){ s.innerHTML='<h2 class="sec">人力編制</h2><p class="lead">人力資料尚未載入（manpower.js）。</p>'; return; }
+  const people=M.people||[]; const dr=M.deptRoster||{}; const multi=people.filter(p=>p.count>=2);
+  let h=`<h2 class="sec">人力編制 · 關鍵人力（編號制）</h2><p class="lead">為保護個資，人員一律以<b>編號</b>呈現（編號↔姓名對照見本機「人員編號對照表-私版.csv」，不上傳網路）。範圍：總指揮中心＋各組組長＋指導法師，共 ${people.length} 位；其中 <b style="color:var(--red)">${multi.length} 位身兼多職</b>。</p>`;
+  h+=`<div class="kpis"><div class="kpi"><div class="n">${people.length}</div><div class="l">關鍵人力</div></div><div class="kpi"><div class="n">${Object.keys(dr).length}</div><div class="l">部門</div></div><div class="kpi"><div class="n" style="color:var(--red)">${multi.length}</div><div class="l">身兼多職</div></div></div>`;
+  h+=`<div class="grid">`;
+  Object.keys(dr).forEach(d=>{
+    const rows=dr[d];
+    h+=`<div class="card"><div class="dept-h"><span class="dot"></span><h3>${esc(d)}</h3></div><div class="meta">關鍵人力 ${rows.length} 位</div><div class="mp-list">`+
+      rows.map(r=>`<div class="mp-row"><span class="pid">#${r.id}</span><span class="mp-role">${esc(r.role)}</span></div>`).join('')+`</div></div>`;
+  });
+  h+=`</div>`;
+  h+=`<h2 class="sec" style="margin-top:26px">身兼多職一覽</h2><p class="lead">同一編號出現在多個角色（可能撞班，詳見「人力衝突檢查」）。</p><div class="hcards">`+
+    multi.slice().sort((a,b)=>b.count-a.count).map(p=>`<div class="hcard"><div class="ev"><span class="pid">#${p.id}</span>　身兼 ${p.count} 職</div>`+
+      `<ul class="bl">`+p.roles.map(r=>`<li>${esc(r.dept)} · ${esc(r.role)}</li>`).join('')+`</ul></div>`).join('')+`</div>`;
+  s.innerHTML=h;
+}
+function renderConflict(){
+  const s=$('#conflict'); const M=window.MANPOWER; const C=M&&M.check;
+  if(!C){ s.innerHTML='<h2 class="sec">人力衝突檢查</h2><p class="lead">衝突檢查資料尚未載入（manpower.js）。</p>'; return; }
+  const V=C.verdicts||[]; const cc=C.counts||{};
+  let h=`<h2 class="sec">人力衝突檢查 · workflow 判定</h2><p class="lead">用 workflow 逐一檢查身兼多職者是否時段撞班、能否執行，並對判為「不可行」者做對抗驗證再定案。</p>`;
+  h+=`<div class="kpis"><div class="kpi"><div class="n" style="color:var(--red)">${cc.red||0}</div><div class="l">🔴 不可行</div></div><div class="kpi"><div class="n" style="color:var(--amber)">${cc.amber||0}</div><div class="l">🟡 需注意</div></div><div class="kpi"><div class="n" style="color:var(--green)">${cc.green||0}</div><div class="l">🟢 可兼任</div></div><div class="kpi"><div class="n">${cc.multi||0}</div><div class="l">身兼多職</div></div></div>`;
+  if(C.observations&&C.observations.length){
+    h+=`<div class="card" style="border-color:var(--gold-soft);margin-bottom:20px"><div class="dept-h"><span class="codebadge" style="background:linear-gradient(135deg,#8a5a12,#b8860b)">觀</span><h3>人力總觀察</h3></div><ul class="bl">`+C.observations.map(o=>`<li>${esc(o)}</li>`).join('')+`</ul></div>`;
+  }
+  const ord=s=>s&&s.indexOf('🔴')===0?0:s&&s.indexOf('🟡')===0?1:2;
+  const sorted=V.slice().sort((a,b)=>ord(a.severity)-ord(b.severity));
+  h+=`<div class="hcards">`;
+  sorted.forEach(v=>{
+    const person=(M.people||[]).find(p=>p.id===v.id);
+    const badges=(person?person.roles:[]).map(r=>`<span class="tag">${esc(r.dept)}·${esc(r.role)}</span>`).join('');
+    const col=(v.severity||'').indexOf('🔴')===0?'var(--red)':(v.severity||'').indexOf('🟡')===0?'var(--amber)':'var(--green)';
+    h+=`<div class="hcard" style="border-left:5px solid ${col}"><div class="ev"><span class="pid">#${esc(v.id)}</span>　${esc(v.severity)}${v.downgraded?' <span class="ch">（驗證後降級）</span>':''}</div>`+
+      `<div class="tags" style="margin:4px 0 8px">${badges}</div>`+
+      (v.conflictWindow&&v.conflictWindow!=='—'?`<div class="row"><span class="lbl">重疊時段</span><span>${esc(v.conflictWindow)}</span></div>`:'')+
+      `<div class="row"><span class="lbl">研判</span><span>${bul(v.reason)}</span></div>`+
+      `<div class="row"><span class="lbl">建議</span><span>${bul(v.suggestion)}</span></div>`+
+      (v.verifyNote?`<div class="row"><span class="lbl">驗證</span><span class="ch">${esc(v.verifyNote)}</span></div>`:'')+
+      `</div>`;
+  });
+  h+=`</div>`;
+  s.innerHTML=h;
+}
 boot();
 </script>
 </body>
