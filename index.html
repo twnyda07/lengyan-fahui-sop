@@ -88,6 +88,12 @@
   .p2 .phase-head{background:linear-gradient(90deg,#7a1f2b,#a83644)}
   .p3 .phase-head{background:linear-gradient(90deg,#8a5a12,#b8860b)}
   .p4 .phase-head{background:linear-gradient(90deg,#4a2545,#6c3a63)}
+  .z-prep .phase-head{background:linear-gradient(90deg,#5a6a2b,#7a8a3a)}
+  .z-setup .phase-head{background:linear-gradient(90deg,#2b5a86,#3a72a6)}
+  .z-rehearse .phase-head{background:linear-gradient(90deg,#8a5a12,#c9821a)}
+  .z-fahui .phase-head{background:linear-gradient(90deg,#7a1f2b,#a83644)}
+  .z-jie .phase-head{background:linear-gradient(90deg,#4a2545,#6c3a63)}
+  .z-teardown .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
   .p5 .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
   .mile{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:12px 18px;border-top:1px dashed var(--line)}
   .mile .t{font-weight:800;color:var(--maroon);font-size:15px}
@@ -224,6 +230,7 @@
 <nav class="tabs">
   <div class="wrap">
     <button data-tab="overview" class="active">總覽 · 組織</button>
+    <button data-tab="zongce">總策劃 · 大排程</button>
     <button data-tab="timeline">主時間軸 Workflow</button>
     <button data-tab="matrix">全組時間表</button>
     <button data-tab="handoff">跨組串連矩陣</button>
@@ -238,6 +245,7 @@
 
 <div class="wrap">
   <section class="tab active" id="overview"></section>
+  <section class="tab" id="zongce"></section>
   <section class="tab" id="timeline"></section>
   <section class="tab" id="matrix"></section>
   <section class="tab" id="handoff"></section>
@@ -252,6 +260,7 @@
 
 <script src="data.js"></script>
 <script src="manpower.js"></script>
+<script src="zongcehua.js"></script>
 <script>
 const D = window.SOP_DATA;
 const $ = (s,el=document)=>el.querySelector(s);
@@ -308,7 +317,7 @@ function boot(){
   chips.push(`<span class="chip">🔒 <b>職稱代號版</b></span>`);
   $('#cmdline').innerHTML = chips.join('');
 
-  renderOverview(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels(); renderManpower(); renderConflict();
+  renderOverview(); renderZongce(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels(); renderManpower(); renderConflict();
   $('#foot').innerHTML = `寶嚴國際佛學研修院／寶嚴禪寺　·　${esc((D.event&&D.event.name)||'楞嚴神奇大法會')} 工作SOP（職稱代號版）　·　資料來源：寶嚴流程表（執事人員組織總表＋法會排程規劃表）　·　人員分工與細節請以總指揮中心最新公告為準`;
 
   // tabs
@@ -362,6 +371,21 @@ function renderOverview(){
   s.innerHTML = h;
 }
 
+function renderZongce(){
+  const s=$('#zongce'); const Z=window.ZONGCEHUA;
+  if(!Z){ s.innerHTML='<div class="loading">總策劃資料未載入（zongcehua.js）</div>'; return; }
+  const ev=Z.event||{};
+  let h=`<h2 class="sec">總策劃 · 大排程</h2>`;
+  h+=`<p class="lead">依試算表「${esc(Z.source||'總策劃')}」整理的真實大排程　·　${esc(ev.venue||'')}　·　人員一律以職稱/組別呈現。</p>`;
+  h+=`<div class="note" style="margin-bottom:18px">📅 <b>${esc(ev.dates||'')}</b><br>🔄 更新日：${esc(Z.updated||'')}（每日自動更新至 2026-10-24，之後待通知）</div>`;
+  h+=`<div class="phase-track">`;
+  (Z.schedule||[]).forEach((d,i)=>{
+    h+=`<div class="phase z-${esc(d.tone||'prep')}"><div class="phase-head"><div class="idx">${i+1}</div><h3>${esc(d.day)}</h3><div class="win">${esc(d.label||'')}</div></div>`;
+    h+=`<div style="padding:12px 18px 14px"><ul class="bl">`+(d.items||[]).map(x=>`<li>${esc(x)}</li>`).join('')+`</ul></div></div>`;
+  });
+  h+=`</div>`;
+  s.innerHTML=h;
+}
 function renderTimeline(){
   const s=$('#timeline'); const tl=(D.coordination&&D.coordination.masterTimeline)||[];
   let h=`<h2 class="sec">主時間軸 · 全場 Workflow</h2><p class="lead">從活動前約2個月的籌備，到圓滿撤場，全程一棒接一棒：每個里程碑標示 <span style="color:#7a5a12">主責組</span> 與 <span style="color:#3f6a52">協作組</span>。</p><div class="phase-track">`;
