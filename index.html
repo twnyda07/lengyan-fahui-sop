@@ -94,6 +94,13 @@
   .z-fahui .phase-head{background:linear-gradient(90deg,#7a1f2b,#a83644)}
   .z-jie .phase-head{background:linear-gradient(90deg,#4a2545,#6c3a63)}
   .z-teardown .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
+  .rbars{display:grid;grid-template-columns:1fr;gap:7px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px}
+  .rbar{display:grid;grid-template-columns:130px 1fr 40px;align-items:center;gap:10px;font-size:14px}
+  .rbar .rbn{color:var(--ink);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rbar .rbt{background:#f0e7d4;border-radius:6px;height:16px;overflow:hidden}
+  .rbar .rbf{display:block;height:100%;background:linear-gradient(90deg,#b8860b,#e8c86a);border-radius:6px}
+  .rbar .rbc{font-weight:800;color:var(--maroon);text-align:right}
+  @media(max-width:560px){.rbar{grid-template-columns:96px 1fr 34px}}
   .p5 .phase-head{background:linear-gradient(90deg,#2f6d4f,#3f8a66)}
   .mile{display:grid;grid-template-columns:120px 1fr;gap:12px;padding:12px 18px;border-top:1px dashed var(--line)}
   .mile .t{font-weight:800;color:var(--maroon);font-size:15px}
@@ -377,7 +384,27 @@ function renderZongce(){
   const ev=Z.event||{};
   let h=`<h2 class="sec">總策劃 · 大排程</h2>`;
   h+=`<p class="lead">依試算表「${esc(Z.source||'總策劃')}」整理的真實大排程　·　${esc(ev.venue||'')}　·　人員一律以職稱/組別呈現。</p>`;
-  h+=`<div class="note" style="margin-bottom:18px">📅 <b>${esc(ev.dates||'')}</b><br>🔄 更新日：${esc(Z.updated||'')}（每日自動更新至 2026-10-24，之後待通知）</div>`;
+  h+=`<div class="note" style="margin-bottom:18px">📅 <b>${esc(ev.dates||'')}</b><br>🔄 更新日：${esc(Z.updated||'')}（每日自動同步試算表至 2026-10-24，之後待通知）</div>`;
+  // 出席人數統計
+  const at=Z.attendance;
+  if(at&&at.cats&&at.cats.length){
+    const cell=v=>{v=String(v==null?'':v).trim();return (!v||v==='-')?'<span style="color:#c9bfa8">·</span>':esc(v);};
+    h+=`<h3 style="font-size:19px;color:var(--plum);margin:6px 0 6px">📊 出席人數（每日）</h3>`;
+    h+=`<div style="overflow-x:auto"><table class="tbl" style="min-width:520px"><thead><tr><th>類別</th>`+at.dates.map(d=>`<th style="text-align:center">${esc(d)}</th>`).join('')+`</tr></thead><tbody>`;
+    at.cats.forEach(c=>{
+      const tot=c.label==='總數';
+      h+=`<tr${tot?' style="background:#faf1dc;font-weight:800"':''}><td${tot?' style="font-weight:800;color:var(--maroon)"':''}>${esc(c.label)}</td>`+c.counts.map(v=>`<td style="text-align:center">${cell(v)}</td>`).join('')+`</tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  }
+  // 志工報名現況
+  const ro=Z.roster;
+  if(ro&&ro.groups&&ro.groups.length){
+    const max=Math.max.apply(null,ro.groups.map(g=>g.count));
+    h+=`<h3 style="font-size:19px;color:var(--plum);margin:22px 0 6px">🙋 志工報名現況　<span style="color:var(--maroon)">${ro.total}</span> 人（依執事分組）</h3>`;
+    h+=`<div class="rbars">`+ro.groups.map(g=>`<div class="rbar"><span class="rbn">${esc(g.group)}</span><span class="rbt"><span class="rbf" style="width:${Math.max(6,Math.round(g.count/max*100))}%"></span></span><span class="rbc">${g.count}</span></div>`).join('')+`</div>`;
+  }
+  h+=`<h3 style="font-size:19px;color:var(--plum);margin:24px 0 8px">🗓️ 全程大排程</h3>`;
   h+=`<div class="phase-track">`;
   (Z.schedule||[]).forEach((d,i)=>{
     h+=`<div class="phase z-${esc(d.tone||'prep')}"><div class="phase-head"><div class="idx">${i+1}</div><h3>${esc(d.day)}</h3><div class="win">${esc(d.label||'')}</div></div>`;
