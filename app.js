@@ -113,7 +113,7 @@ function renderZongce(){
   const ev=Z.event||{};
   let h=`<h2 class="sec">總策劃 · 大排程</h2>`;
   h+=`<p class="lead">依試算表「${esc(Z.source||'總策劃')}」整理的真實大排程　·　${esc(ev.venue||'')}　·　人員一律以職稱/組別呈現。</p>`;
-  h+=`<div class="note" style="margin-bottom:18px">📅 <b>${esc(ev.dates||'')}</b><br>🔄 更新日：${esc(Z.updated||'')}（每日自動同步試算表至 2026-10-24，之後待通知）</div>`;
+  h+=`<div class="note" style="margin-bottom:18px">📅 <b>${esc(ev.dates||'')}</b><br>🔄 更新日：${esc(Z.updated||'')}（每日自動同步試算表至 2026-10-28，之後待通知）</div>`;
   // 出席人數統計
   const at=Z.attendance;
   if(at&&at.cats&&at.cats.length){
