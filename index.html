@@ -116,6 +116,11 @@
   .toolbar input{min-width:220px}
   .tbl{width:100%;border-collapse:collapse;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
   .tbl th{background:#f0e7d4;color:#5a4a2e;text-align:left;font-size:14px;padding:11px 13px;position:sticky;top:52px}
+  /* 兩列表頭（出席人數的「階段列＋日期列」）：.tbl th 預設 sticky top:52px，兩列會疊在一起；
+     而且外層 overflow-x:auto 本身就是捲動容器，sticky 的 top 會算錯而出現空白帶。
+     這張表只有 16 列，不需要釘住表頭 → 直接改回 static，版面才正確。 */
+  .tbl.hasphase thead th{position:static}
+  .tbl.hasphase thead tr:nth-child(1) th+th{text-align:center;border-left:1px solid var(--line)}
   .tbl td{padding:11px 13px;border-top:1px solid var(--line);font-size:15px;vertical-align:top}
   .tbl tr:hover td{background:#fbf5e8}
   .pill{display:inline-block;padding:2px 9px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap}
@@ -302,7 +307,7 @@
   <div class="foot" id="foot"></div>
 </div>
 
-<script src="payload.js?v=6bf6e11d81"></script>
+<script src="payload.js?v=639b618cfb"></script>
 <script>
 (function(){
   var KEY='baoyan_ly_sop_pw';
@@ -333,7 +338,7 @@
     window.MANPOWER=data.MANPOWER;
     window.ZONGCEHUA=data.ZONGCEHUA;
     var s=document.createElement('script');
-    s.src='app.js?v=6bf6e11d81';
+    s.src='app.js?v=639b618cfb';
     s.onload=function(){
       gate.remove();
       document.body.classList.remove('locked');

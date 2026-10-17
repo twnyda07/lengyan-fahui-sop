@@ -75,7 +75,7 @@ function renderOverview(){
     [co.channels?.length||0,'通訊頻道'],
     [co.escalation?.length||0,'突發升級機制'],
   ];
-  let h = `<h2 class="sec">總覽 · 組織架構</h2><p class="lead">本 SOP 依「寶嚴流程表」（執事人員組織總表＋法會排程規劃表）真實內容製作。總指揮中心統籌，15 個工作部門串連協作、一棒接一棒。</p>`;
+  let h = `<h2 class="sec">總覽 · 組織架構</h2><p class="lead">本 SOP 依「寶嚴流程表」與「2026楞嚴大法會 總策劃」試算表真實內容製作。總指揮中心統籌，${D.departments?.length||0} 個工作部門串連協作、一棒接一棒。</p>`;
   h += `<div class="kpis">`+kpi.map(k=>`<div class="kpi"><div class="n">${k[0]}</div><div class="l">${k[1]}</div></div>`).join('')+`</div>`;
   // real ritual reference
   const rn = (D.event&&D.event.ritualNotes)||'';
@@ -87,6 +87,27 @@ function renderOverview(){
       return `<div class="rn-line">${L}</div>`;
     }).filter(Boolean).join('');
     h += `<div class="card" style="margin-bottom:22px;border-color:var(--gold-soft)"><div class="dept-h"><span class="codebadge" style="background:linear-gradient(135deg,#8a5a12,#b8860b)">禮</span><h3>本場真實儀軌與項目（唯一取材來源）</h3></div><div class="rn-body">${lines}</div></div>`;
+  }
+  // 每日流程表（總策劃試算表）
+  const R=(D.event&&D.event.dailyRundown)||null;
+  if(R){
+    h += `<div class="card" style="margin-bottom:22px;border-color:var(--plum)"><div class="dept-h"><span class="codebadge" style="background:linear-gradient(135deg,#6b2c4e,#8e3d66)">程</span><h3>每日流程表（總策劃試算表・權威時刻表）</h3></div>`;
+    if(R.note) h += `<div class="meta">${esc(R.note)}</div>`;
+    h += `<div style="overflow-x:auto"><table class="tbl" style="min-width:420px"><thead><tr><th style="width:140px">時間</th><th>內壇流程（三天共通）</th></tr></thead><tbody>`;
+    (R.common||[]).forEach(r=>{ h += `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`; });
+    h += `</tbody></table></div>`;
+    h += `<div class="grid" style="margin-top:14px">`;
+    (R.days||[]).forEach(d=>{
+      h += `<div class="card" style="margin:0"><div class="dept-h"><span class="dot"></span><h3 style="font-size:17px">${esc(d.day)}</h3></div><ul class="bl">`+
+           (d.items||[]).map(x=>`<li>${esc(x)}</li>`).join('')+`</ul></div>`;
+    });
+    h += `</div>`;
+    if((R.discrepancies||[]).length){
+      h += `<div class="rn-warn" style="margin-top:14px"><b>⚠️ 待承辦確認（來源之間不一致，未代為合併）</b><ul class="bl">`+
+           R.discrepancies.map(x=>`<li>${esc(x)}</li>`).join('')+`</ul></div>`;
+    }
+    if(R.source) h += `<div class="meta" style="margin-top:10px">資料來源：${esc(R.source)}</div>`;
+    h += `</div>`;
   }
   // command center
   const c=D.command||{};
@@ -119,9 +140,21 @@ function renderZongce(){
   if(at&&at.cats&&at.cats.length){
     const cell=v=>{v=String(v==null?'':v).trim();return (!v||v==='-')?'<span style="color:#c9bfa8">·</span>':esc(v);};
     h+=`<h3 style="font-size:19px;color:var(--plum);margin:6px 0 6px">📊 出席人數（每日）</h3>`;
-    h+=`<div style="overflow-x:auto"><table class="tbl" style="min-width:520px"><thead><tr><th>類別</th>`+at.dates.map(d=>`<th style="text-align:center">${esc(d)}</th>`).join('')+`</tr></thead><tbody>`;
+    // 階段列（進場前置／楞嚴法會／菩薩戒／撤場）——把連續同階段的欄合併，8 欄才看得懂
+    const hasPhase=!!(at.phases&&at.phases.length===at.dates.length);
+    h+=`<div style="overflow-x:auto"><table class="tbl${hasPhase?' hasphase':''}" style="min-width:520px"><thead>`;
+    if(hasPhase){
+      let ph=`<tr><th></th>`;
+      for(let i=0;i<at.phases.length;){
+        let j=i; while(j<at.phases.length&&at.phases[j]===at.phases[i]) j++;
+        ph+=`<th colspan="${j-i}" style="font-weight:700">${esc(at.phases[i])}</th>`;
+        i=j;
+      }
+      h+=ph+`</tr>`;
+    }
+    h+=`<tr><th>類別</th>`+at.dates.map(d=>`<th style="text-align:center">${esc(d)}</th>`).join('')+`</tr></thead><tbody>`;
     at.cats.forEach(c=>{
-      const tot=c.label==='總數';
+      const tot=c.label==='總數'||c.label==='總參加人數';
       h+=`<tr${tot?' style="background:#faf1dc;font-weight:800"':''}><td${tot?' style="font-weight:800;color:var(--maroon)"':''}>${esc(c.label)}</td>`+c.counts.map(v=>`<td style="text-align:center">${cell(v)}</td>`).join('')+`</tr>`;
     });
     h+=`</tbody></table></div>`;
