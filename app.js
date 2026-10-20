@@ -301,6 +301,7 @@ function fpWedge(deg,rI,rO){const a0=deg-22.5,a1=deg+22.5;
   return 'M'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' L')+' Z';}
 
 function fpBuild(svg,F){
+  const L=F.L||{};
   svg.innerHTML='';
   const g=(id)=>{const x=fpEl('g',{id:id,class:'lay'});svg.appendChild(x);return x;};
   const gH=g('hall');
@@ -308,43 +309,43 @@ function fpBuild(svg,F){
   gH.appendChild(fpEl('text',{x:92,y:182,class:'fpdim'},(F.dims&&F.dims[0])||''));
   const gB=g('bluewall');
   [86,898].forEach(x=>gB.appendChild(fpEl('rect',{x:x-8,y:300,width:16,height:760,class:'bluewall'})));
-  gB.appendChild(fpEl('text',{x:912,y:1082,class:'tagS2'},'藍牆邊線'));
-  gB.appendChild(fpEl('text',{x:60,y:1082,class:'tagS2','text-anchor':'end'},'藍牆邊線'));
-  svg.appendChild(fpEl('text',{x:44,y:690,class:'compass'},'西'));
-  svg.appendChild(fpEl('text',{x:956,y:690,class:'compass'},'東'));
+  gB.appendChild(fpEl('text',{x:912,y:1082,class:'tagS2'},L.bluewall));
+  gB.appendChild(fpEl('text',{x:60,y:1082,class:'tagS2','text-anchor':'end'},L.bluewall));
+  svg.appendChild(fpEl('text',{x:44,y:690,class:'compass'},L.w));
+  svg.appendChild(fpEl('text',{x:956,y:690,class:'compass'},L.e));
 
   const gS=g('stage');
   gS.appendChild(fpEl('path',{d:'M200,200 L800,200 L800,268 Q500,310 200,268 Z',class:'fpstage'}));
-  gS.appendChild(fpEl('text',{x:500,y:252,class:'stageT'},'舞台　北'));
+  gS.appendChild(fpEl('text',{x:500,y:252,class:'stageT'},L.stage));
   gS.appendChild(fpEl('circle',{cx:262,cy:292,r:11,class:'fq'}));
-  gS.appendChild(fpEl('text',{x:262,y:296,class:'fqT'},'木魚'));
+  gS.appendChild(fpEl('text',{x:262,y:296,class:'fqT'},L.muyu));
   gS.appendChild(fpEl('circle',{cx:738,cy:292,r:11,class:'fq'}));
-  gS.appendChild(fpEl('text',{x:738,y:296,class:'fqT'},'大磬'));
+  gS.appendChild(fpEl('text',{x:738,y:296,class:'fqT'},L.daqing));
   const gXZ=g('xiaozai');
   gXZ.appendChild(fpEl('rect',{x:352,y:168,width:296,height:30,class:'xiaozaiBox'}));
-  gXZ.appendChild(fpEl('text',{x:500,y:189,class:'tagM'},'消災壇　1800 × 180'));
+  gXZ.appendChild(fpEl('text',{x:500,y:189,class:'tagM'},L.xiaozai));
   const gC=g('cmd');
   gC.appendChild(fpEl('rect',{x:806,y:200,width:92,height:68,class:'fpbox'}));
-  gC.appendChild(fpEl('text',{x:852,y:228,class:'tagS2'},'指揮中心'));
-  gC.appendChild(fpEl('text',{x:852,y:246,class:'tagXS'},'（舞台下層）'));
+  gC.appendChild(fpEl('text',{x:852,y:228,class:'tagS2'},L.cmd));
+  gC.appendChild(fpEl('text',{x:852,y:246,class:'tagXS'},L.understage));
   const gY=g('yuannian');
   gY.appendChild(fpEl('rect',{x:102,y:200,width:92,height:68,class:'fpbox'}));
-  gY.appendChild(fpEl('text',{x:148,y:228,class:'tagS2'},'元年控台區'));
-  gY.appendChild(fpEl('text',{x:148,y:246,class:'tagXS'},'（舞台下層）'));
+  gY.appendChild(fpEl('text',{x:148,y:228,class:'tagS2'},L.yuannian));
+  gY.appendChild(fpEl('text',{x:148,y:246,class:'tagXS'},L.understage));
 
   const gZ=g('wedgeAll');
-  [[150,360,180,150,-45,'35 席 / 36 席'],[670,360,180,150,45,'35 席 / 36 席'],
-   [150,870,180,150,45,'65 席'],[670,870,180,150,-45,'65 席']].forEach(b=>{
+  [[150,360,180,150,-45,L.seat3536],[670,360,180,150,45,L.seat3536],
+   [150,870,180,150,45,L.seat65],[670,870,180,150,-45,L.seat65]].forEach(b=>{
     const mx=b[0]+b[2]/2,my=b[1]+b[3]/2;
     gZ.appendChild(fpEl('rect',{x:b[0],y:b[1],width:b[2],height:b[3],rx:4,class:'seatblk',
       transform:'rotate('+b[4]+' '+mx+' '+my+')'}));
-    gZ.appendChild(fpEl('text',{x:mx,y:my-4,class:'tagM'},'總持區'));
+    gZ.appendChild(fpEl('text',{x:mx,y:my-4,class:'tagM'},L.zongchi));
     gZ.appendChild(fpEl('text',{x:mx,y:my+16,class:'tagS2'},b[5]));
   });
   [[330,1010],[560,1010]].forEach(p=>{
     gZ.appendChild(fpEl('rect',{x:p[0],y:p[1],width:110,height:86,rx:4,class:'seatblk'}));
-    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+44,class:'tagM'},'總持區'));
-    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+62,class:'tagS2'},'52 席'));
+    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+44,class:'tagM'},L.zongchi));
+    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+62,class:'tagS2'},L.seat52));
   });
 
   const gN=g('neitan');
@@ -360,72 +361,72 @@ function fpBuild(svg,F){
   const gO=g('octa');
   gO.appendChild(fpEl('polygon',{points:fpOct(FP_R0),class:'octa'}));
   gO.appendChild(fpEl('polygon',{points:fpOct(FP_R0-22),class:'octaIn'}));
-  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY-16,class:'octaT'},'八角壇城'));
-  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+6,class:'tagS2'},'壇心'));
-  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+26,class:'tagXS'},'主法桌・主法拜墊'));
-  [['北',FP_CX,FP_CY-FP_R0+16],['南',FP_CX,FP_CY+FP_R0-8],
-   ['西',FP_CX-FP_R0+18,FP_CY+4],['東',FP_CX+FP_R0-18,FP_CY+4]]
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY-16,class:'octaT'},L.octa));
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+6,class:'tagS2'},L.tanxin));
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+26,class:'tagXS'},L.zhufa));
+  [[L.n,FP_CX,FP_CY-FP_R0+16],[L.s,FP_CX,FP_CY+FP_R0-8],
+   [L.w,FP_CX-FP_R0+18,FP_CY+4],[L.e,FP_CX+FP_R0-18,FP_CY+4]]
    .forEach(d=>gO.appendChild(fpEl('text',{x:d[1],y:d[2],class:'octaDir'},d[0])));
   const gX=g('xiaoxiangdeng');
   for(let i=0;i<8;i++){const p=fpAt(22.5+i*45,FP_R0+14);
     gX.appendChild(fpEl('circle',{cx:p[0],cy:p[1],r:9,class:'dotXd'}));}
-  gX.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+FP_R0+40,class:'tagXS'},'小香燈 ×8（八角外緣）'));
+  gX.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+FP_R0+40,class:'tagXS'},L.xiaoxd));
 
   const gOut=g('outer');
   gOut.appendChild(fpEl('rect',{x:772,y:630,width:96,height:120,rx:4,class:'wedgeBox'}));
-  ['報名未三天','的內壇'].forEach((t,i)=>gOut.appendChild(fpEl('text',{x:820,y:682+i*17,class:'wedgeT'},t)));
+  [L.unreg1,L.unreg2].forEach((t,i)=>gOut.appendChild(fpEl('text',{x:820,y:682+i*17,class:'wedgeT'},t)));
   const gJ=g('jingang');
   gJ.appendChild(fpEl('rect',{x:400,y:962,width:200,height:48,rx:4,class:'wedgeBox'}));
-  gJ.appendChild(fpEl('text',{x:500,y:982,class:'wedgeT'},'金剛藏王・天女'));
-  gJ.appendChild(fpEl('text',{x:500,y:999,class:'tagS2'},'32 位'));
+  gJ.appendChild(fpEl('text',{x:500,y:982,class:'wedgeT'},L.jingang));
+  gJ.appendChild(fpEl('text',{x:500,y:999,class:'tagS2'},L.jingangN));
   const gBg=g('bagongde');
   gBg.appendChild(fpEl('rect',{x:700,y:820,width:110,height:44,rx:4,class:'boxLite'}));
-  gBg.appendChild(fpEl('text',{x:755,y:840,class:'tagS2'},'八功德水區'));
-  gBg.appendChild(fpEl('text',{x:755,y:856,class:'tagXS'},'手帕區'));
+  gBg.appendChild(fpEl('text',{x:755,y:840,class:'tagS2'},L.bagongde));
+  gBg.appendChild(fpEl('text',{x:755,y:856,class:'tagXS'},L.shoupa));
 
   const gA=g('aisleC');
   gA.appendChild(fpEl('rect',{x:470,y:1016,width:60,height:174,class:'aisle'}));
-  gA.appendChild(fpEl('text',{x:500,y:1118,class:'tagM',transform:'rotate(-90 500 1118)'},'中央走道'));
+  gA.appendChild(fpEl('text',{x:500,y:1118,class:'tagM',transform:'rotate(-90 500 1118)'},L.aisle));
   const gW=g('sideW');
   gW.appendChild(fpEl('rect',{x:78,y:620,width:16,height:90,class:'door'}));
-  gW.appendChild(fpEl('text',{x:100,y:668,class:'tagXS','text-anchor':'start'},'西側門'));
+  gW.appendChild(fpEl('text',{x:100,y:668,class:'tagXS','text-anchor':'start'},L.doorW));
   const gE=g('sideE');
   gE.appendChild(fpEl('rect',{x:906,y:620,width:16,height:90,class:'door'}));
-  gE.appendChild(fpEl('text',{x:900,y:668,class:'tagXS','text-anchor':'end'},'東側門'));
+  gE.appendChild(fpEl('text',{x:900,y:668,class:'tagXS','text-anchor':'end'},L.doorE));
   const gK=g('basket');
   gK.appendChild(fpEl('rect',{x:92,y:1160,width:96,height:50,rx:4,class:'boxLite'}));
-  gK.appendChild(fpEl('text',{x:140,y:1190,class:'tagS2'},'籃球架區'));
+  gK.appendChild(fpEl('text',{x:140,y:1190,class:'tagS2'},L.basket));
 
   const sy=1252;
   svg.appendChild(fpEl('line',{x1:70,y1:sy-16,x2:930,y2:sy-16,class:'sep'}));
   const gEW=g('entryW');
   gEW.appendChild(fpEl('rect',{x:300,y:sy-26,width:20,height:20,class:'entry'}));
-  gEW.appendChild(fpEl('text',{x:310,y:sy+2,class:'tagS2'},'西單入口'));
+  gEW.appendChild(fpEl('text',{x:310,y:sy+2,class:'tagS2'},L.entryW));
   const gEE=g('entryE');
   gEE.appendChild(fpEl('rect',{x:690,y:sy-26,width:20,height:20,class:'entry'}));
-  gEE.appendChild(fpEl('text',{x:700,y:sy+2,class:'tagS2'},'東單入口'));
+  gEE.appendChild(fpEl('text',{x:700,y:sy+2,class:'tagS2'},L.entryE));
   const gFW=g('fudanW');
   gFW.appendChild(fpEl('rect',{x:92,y:sy+14,width:176,height:44,rx:4,class:'svc'}));
-  gFW.appendChild(fpEl('text',{x:180,y:sy+41,class:'tagM'},'福田＋服務台＋文創'));
+  gFW.appendChild(fpEl('text',{x:180,y:sy+41,class:'tagM'},L.fudanW));
   const gGH=g('gonghua');
   [290,690].forEach(x=>{gGH.appendChild(fpEl('rect',{x:x,y:sy+14,width:150,height:22,rx:3,class:'svc'}));
-    gGH.appendChild(fpEl('text',{x:x+75,y:sy+30,class:'tagS2'},'供花＋燈'));});
+    gGH.appendChild(fpEl('text',{x:x+75,y:sy+30,class:'tagS2'},L.gonghua));});
   const gSD=g('shuideng');
   [290,470,690].forEach(x=>{gSD.appendChild(fpEl('rect',{x:x,y:sy+40,width:150,height:22,rx:3,class:'svc'}));
-    gSD.appendChild(fpEl('text',{x:x+75,y:sy+56,class:'tagS2'},'水燈'));});
+    gSD.appendChild(fpEl('text',{x:x+75,y:sy+56,class:'tagS2'},L.shuideng));});
   const gCJ=g('chaojian');
   gCJ.appendChild(fpEl('rect',{x:462,y:sy+8,width:166,height:28,rx:3,class:'altar'}));
-  gCJ.appendChild(fpEl('text',{x:545,y:sy+27,class:'tagM'},'超薦壇　600'));
+  gCJ.appendChild(fpEl('text',{x:545,y:sy+27,class:'tagM'},L.chaojian));
   const gFS=g('fudanS');
   gFS.appendChild(fpEl('rect',{x:92,y:sy+86,width:200,height:40,rx:4,class:'svc'}));
-  gFS.appendChild(fpEl('text',{x:192,y:sy+111,class:'tagM'},'福田＋牌位＋服務台'));
+  gFS.appendChild(fpEl('text',{x:192,y:sy+111,class:'tagM'},L.fudanS));
   const gXP=g('xiepaiwei');
   [310,440].forEach(x=>{gXP.appendChild(fpEl('rect',{x:x,y:sy+86,width:110,height:40,rx:4,class:'svc'}));
-    gXP.appendChild(fpEl('text',{x:x+55,y:sy+111,class:'tagS2'},'寫牌位區'));});
+    gXP.appendChild(fpEl('text',{x:x+55,y:sy+111,class:'tagS2'},L.xiepaiwei));});
   const gEX=g('expo');
   gEX.appendChild(fpEl('rect',{x:580,y:sy+86,width:350,height:40,rx:4,class:'boxLite'}));
-  gEX.appendChild(fpEl('text',{x:755,y:sy+104,class:'tagS2'},'心的永續力展示區'));
-  gEX.appendChild(fpEl('text',{x:755,y:sy+120,class:'tagXS'},'五十陰魔 · 十番顯見 · 森林區'));
+  gEX.appendChild(fpEl('text',{x:755,y:sy+104,class:'tagS2'},L.expo));
+  gEX.appendChild(fpEl('text',{x:755,y:sy+120,class:'tagXS'},L.expoSub));
 }
 
 function fpApply(key){
