@@ -53,7 +53,7 @@ function boot(){
   chips.push(`<span class="chip">🔒 <b>職稱代號版</b></span>`);
   $('#cmdline').innerHTML = chips.join('');
 
-  renderOverview(); renderZongce(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderDepts(); renderChannels(); renderManpower(); renderConflict();
+  renderOverview(); renderZongce(); renderTimeline(); renderMatrix(); renderHandoff(); renderNotify(); renderCoop(); renderFloorplan(); renderDepts(); renderChannels(); renderManpower(); renderConflict();
   $('#foot').innerHTML = `寶嚴國際佛學研修院／寶嚴禪寺　·　${esc((D.event&&D.event.name)||'楞嚴神奇大法會')} 工作SOP（職稱代號版）　·　資料來源：寶嚴流程表（執事人員組織總表＋法會排程規劃表）　·　人員分工與細節請以總指揮中心最新公告為準`;
 
   // tabs
@@ -284,6 +284,191 @@ function renderCoop(){
     h+=`<div class="coop"><div class="mo">🪷 ${esc(r.moment)}</div><div class="gs tags">${gs}</div><div class="fl">${bulFlow(r.flow)}</div></div>`;
   });
   s.innerHTML=h;
+}
+
+/* ── 壇場平面圖（版面程式；所有文字與數字都來自加密的 D.floorplan） ── */
+const FP_NS='http://www.w3.org/2000/svg';
+function fpEl(n,a,t){const e=document.createElementNS(FP_NS,n);for(const k in(a||{}))e.setAttribute(k,a[k]);
+  if(t!=null)e.textContent=t;return e;}
+const FP_CX=500, FP_CY=690, FP_R0=78, FP_R1=175, FP_R2=300;
+const fpRad=d=>d*Math.PI/180;
+const fpAt=(deg,r)=>[FP_CX+r*Math.cos(fpRad(deg)), FP_CY+r*Math.sin(fpRad(deg))];
+function fpOct(r){const p=[];for(let i=0;i<8;i++){const a=fpRad(22.5+i*45);
+  p.push([FP_CX+r*Math.cos(a),FP_CY+r*Math.sin(a)]);}
+  return p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ');}
+function fpWedge(deg,rI,rO){const a0=deg-22.5,a1=deg+22.5;
+  const p=[fpAt(a0,rI),fpAt(a0,rO),fpAt(a1,rO),fpAt(a1,rI)];
+  return 'M'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' L')+' Z';}
+
+function fpBuild(svg,F){
+  svg.innerHTML='';
+  const g=(id)=>{const x=fpEl('g',{id:id,class:'lay'});svg.appendChild(x);return x;};
+  const gH=g('hall');
+  gH.appendChild(fpEl('rect',{x:70,y:150,width:860,height:1080,rx:6,class:'hallbox'}));
+  gH.appendChild(fpEl('text',{x:92,y:182,class:'fpdim'},(F.dims&&F.dims[0])||''));
+  const gB=g('bluewall');
+  [86,898].forEach(x=>gB.appendChild(fpEl('rect',{x:x-8,y:300,width:16,height:760,class:'bluewall'})));
+  gB.appendChild(fpEl('text',{x:912,y:1082,class:'tagS2'},'藍牆邊線'));
+  gB.appendChild(fpEl('text',{x:60,y:1082,class:'tagS2','text-anchor':'end'},'藍牆邊線'));
+  svg.appendChild(fpEl('text',{x:44,y:690,class:'compass'},'西'));
+  svg.appendChild(fpEl('text',{x:956,y:690,class:'compass'},'東'));
+
+  const gS=g('stage');
+  gS.appendChild(fpEl('path',{d:'M200,200 L800,200 L800,268 Q500,310 200,268 Z',class:'fpstage'}));
+  gS.appendChild(fpEl('text',{x:500,y:252,class:'stageT'},'舞台　北'));
+  gS.appendChild(fpEl('circle',{cx:262,cy:292,r:11,class:'fq'}));
+  gS.appendChild(fpEl('text',{x:262,y:296,class:'fqT'},'木魚'));
+  gS.appendChild(fpEl('circle',{cx:738,cy:292,r:11,class:'fq'}));
+  gS.appendChild(fpEl('text',{x:738,y:296,class:'fqT'},'大磬'));
+  const gXZ=g('xiaozai');
+  gXZ.appendChild(fpEl('rect',{x:352,y:168,width:296,height:30,class:'xiaozaiBox'}));
+  gXZ.appendChild(fpEl('text',{x:500,y:189,class:'tagM'},'消災壇　1800 × 180'));
+  const gC=g('cmd');
+  gC.appendChild(fpEl('rect',{x:806,y:200,width:92,height:68,class:'fpbox'}));
+  gC.appendChild(fpEl('text',{x:852,y:228,class:'tagS2'},'指揮中心'));
+  gC.appendChild(fpEl('text',{x:852,y:246,class:'tagXS'},'（舞台下層）'));
+  const gY=g('yuannian');
+  gY.appendChild(fpEl('rect',{x:102,y:200,width:92,height:68,class:'fpbox'}));
+  gY.appendChild(fpEl('text',{x:148,y:228,class:'tagS2'},'元年控台區'));
+  gY.appendChild(fpEl('text',{x:148,y:246,class:'tagXS'},'（舞台下層）'));
+
+  const gZ=g('wedgeAll');
+  [[150,360,180,150,-45,'35 席 / 36 席'],[670,360,180,150,45,'35 席 / 36 席'],
+   [150,870,180,150,45,'65 席'],[670,870,180,150,-45,'65 席']].forEach(b=>{
+    const mx=b[0]+b[2]/2,my=b[1]+b[3]/2;
+    gZ.appendChild(fpEl('rect',{x:b[0],y:b[1],width:b[2],height:b[3],rx:4,class:'seatblk',
+      transform:'rotate('+b[4]+' '+mx+' '+my+')'}));
+    gZ.appendChild(fpEl('text',{x:mx,y:my-4,class:'tagM'},'總持區'));
+    gZ.appendChild(fpEl('text',{x:mx,y:my+16,class:'tagS2'},b[5]));
+  });
+  [[330,1010],[560,1010]].forEach(p=>{
+    gZ.appendChild(fpEl('rect',{x:p[0],y:p[1],width:110,height:86,rx:4,class:'seatblk'}));
+    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+44,class:'tagM'},'總持區'));
+    gZ.appendChild(fpEl('text',{x:p[0]+55,y:p[1]+62,class:'tagS2'},'52 席'));
+  });
+
+  const gN=g('neitan');
+  (F.wedges||[]).forEach(w=>{
+    gN.appendChild(fpEl('path',{d:fpWedge(w.deg,FP_R1,FP_R2),class:'wedge',id:'wedge'+w.dir}));
+    const c=fpAt(w.deg,(FP_R1+FP_R2)/2), ws=String(w.zone).split(' · ');
+    ws.forEach((t,i)=>gN.appendChild(fpEl('text',
+      {x:c[0],y:c[1]+(i-(ws.length-1)/2)*16+5,class:'wedgeT'},t)));
+  });
+  const gT=g('tanxin');
+  (F.wedges||[]).forEach(w=>gT.appendChild(fpEl('path',{d:fpWedge(w.deg,FP_R0,FP_R1),class:'wedgeIn'})));
+
+  const gO=g('octa');
+  gO.appendChild(fpEl('polygon',{points:fpOct(FP_R0),class:'octa'}));
+  gO.appendChild(fpEl('polygon',{points:fpOct(FP_R0-22),class:'octaIn'}));
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY-16,class:'octaT'},'八角壇城'));
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+6,class:'tagS2'},'壇心'));
+  gO.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+26,class:'tagXS'},'主法桌・主法拜墊'));
+  [['北',FP_CX,FP_CY-FP_R0+16],['南',FP_CX,FP_CY+FP_R0-8],
+   ['西',FP_CX-FP_R0+18,FP_CY+4],['東',FP_CX+FP_R0-18,FP_CY+4]]
+   .forEach(d=>gO.appendChild(fpEl('text',{x:d[1],y:d[2],class:'octaDir'},d[0])));
+  const gX=g('xiaoxiangdeng');
+  for(let i=0;i<8;i++){const p=fpAt(22.5+i*45,FP_R0+14);
+    gX.appendChild(fpEl('circle',{cx:p[0],cy:p[1],r:9,class:'dotXd'}));}
+  gX.appendChild(fpEl('text',{x:FP_CX,y:FP_CY+FP_R0+40,class:'tagXS'},'小香燈 ×8（八角外緣）'));
+
+  const gOut=g('outer');
+  gOut.appendChild(fpEl('rect',{x:772,y:630,width:96,height:120,rx:4,class:'wedgeBox'}));
+  ['報名未三天','的內壇'].forEach((t,i)=>gOut.appendChild(fpEl('text',{x:820,y:682+i*17,class:'wedgeT'},t)));
+  const gJ=g('jingang');
+  gJ.appendChild(fpEl('rect',{x:400,y:962,width:200,height:48,rx:4,class:'wedgeBox'}));
+  gJ.appendChild(fpEl('text',{x:500,y:982,class:'wedgeT'},'金剛藏王・天女'));
+  gJ.appendChild(fpEl('text',{x:500,y:999,class:'tagS2'},'32 位'));
+  const gBg=g('bagongde');
+  gBg.appendChild(fpEl('rect',{x:700,y:820,width:110,height:44,rx:4,class:'boxLite'}));
+  gBg.appendChild(fpEl('text',{x:755,y:840,class:'tagS2'},'八功德水區'));
+  gBg.appendChild(fpEl('text',{x:755,y:856,class:'tagXS'},'手帕區'));
+
+  const gA=g('aisleC');
+  gA.appendChild(fpEl('rect',{x:470,y:1016,width:60,height:174,class:'aisle'}));
+  gA.appendChild(fpEl('text',{x:500,y:1118,class:'tagM',transform:'rotate(-90 500 1118)'},'中央走道'));
+  const gW=g('sideW');
+  gW.appendChild(fpEl('rect',{x:78,y:620,width:16,height:90,class:'door'}));
+  gW.appendChild(fpEl('text',{x:100,y:668,class:'tagXS','text-anchor':'start'},'西側門'));
+  const gE=g('sideE');
+  gE.appendChild(fpEl('rect',{x:906,y:620,width:16,height:90,class:'door'}));
+  gE.appendChild(fpEl('text',{x:900,y:668,class:'tagXS','text-anchor':'end'},'東側門'));
+  const gK=g('basket');
+  gK.appendChild(fpEl('rect',{x:92,y:1160,width:96,height:50,rx:4,class:'boxLite'}));
+  gK.appendChild(fpEl('text',{x:140,y:1190,class:'tagS2'},'籃球架區'));
+
+  const sy=1252;
+  svg.appendChild(fpEl('line',{x1:70,y1:sy-16,x2:930,y2:sy-16,class:'sep'}));
+  const gEW=g('entryW');
+  gEW.appendChild(fpEl('rect',{x:300,y:sy-26,width:20,height:20,class:'entry'}));
+  gEW.appendChild(fpEl('text',{x:310,y:sy+2,class:'tagS2'},'西單入口'));
+  const gEE=g('entryE');
+  gEE.appendChild(fpEl('rect',{x:690,y:sy-26,width:20,height:20,class:'entry'}));
+  gEE.appendChild(fpEl('text',{x:700,y:sy+2,class:'tagS2'},'東單入口'));
+  const gFW=g('fudanW');
+  gFW.appendChild(fpEl('rect',{x:92,y:sy+14,width:176,height:44,rx:4,class:'svc'}));
+  gFW.appendChild(fpEl('text',{x:180,y:sy+41,class:'tagM'},'福田＋服務台＋文創'));
+  const gGH=g('gonghua');
+  [290,690].forEach(x=>{gGH.appendChild(fpEl('rect',{x:x,y:sy+14,width:150,height:22,rx:3,class:'svc'}));
+    gGH.appendChild(fpEl('text',{x:x+75,y:sy+30,class:'tagS2'},'供花＋燈'));});
+  const gSD=g('shuideng');
+  [290,470,690].forEach(x=>{gSD.appendChild(fpEl('rect',{x:x,y:sy+40,width:150,height:22,rx:3,class:'svc'}));
+    gSD.appendChild(fpEl('text',{x:x+75,y:sy+56,class:'tagS2'},'水燈'));});
+  const gCJ=g('chaojian');
+  gCJ.appendChild(fpEl('rect',{x:462,y:sy+8,width:166,height:28,rx:3,class:'altar'}));
+  gCJ.appendChild(fpEl('text',{x:545,y:sy+27,class:'tagM'},'超薦壇　600'));
+  const gFS=g('fudanS');
+  gFS.appendChild(fpEl('rect',{x:92,y:sy+86,width:200,height:40,rx:4,class:'svc'}));
+  gFS.appendChild(fpEl('text',{x:192,y:sy+111,class:'tagM'},'福田＋牌位＋服務台'));
+  const gXP=g('xiepaiwei');
+  [310,440].forEach(x=>{gXP.appendChild(fpEl('rect',{x:x,y:sy+86,width:110,height:40,rx:4,class:'svc'}));
+    gXP.appendChild(fpEl('text',{x:x+55,y:sy+111,class:'tagS2'},'寫牌位區'));});
+  const gEX=g('expo');
+  gEX.appendChild(fpEl('rect',{x:580,y:sy+86,width:350,height:40,rx:4,class:'boxLite'}));
+  gEX.appendChild(fpEl('text',{x:755,y:sy+104,class:'tagS2'},'心的永續力展示區'));
+  gEX.appendChild(fpEl('text',{x:755,y:sy+120,class:'tagXS'},'五十陰魔 · 十番顯見 · 森林區'));
+}
+
+function fpApply(key){
+  const F=(D&&D.floorplan)||{}; const G=(F.groups||{})[key]; if(!G) return;
+  const svg=document.getElementById('fpsvg'); if(!svg) return;
+  const SEL='.lay, path.wedge';
+  svg.querySelectorAll(SEL).forEach(n=>n.classList.remove('hit','dim'));
+  if(key!=='all'){
+    svg.querySelectorAll(SEL).forEach(n=>n.classList.add('dim'));
+    (G.hits||[]).forEach(id=>{const n=svg.querySelector('#'+id);
+      if(n){n.classList.remove('dim');n.classList.add('hit');}});
+  }
+  document.getElementById('floorplan').style.setProperty('--fphit',G.color||'#7a5a12');
+  let h='<h3>'+esc(G.name)+'</h3>';
+  if(key==='all'){
+    h+='<table class="fptot"><tbody>'+
+      (F.totals||[]).map(t=>'<tr><td>'+esc(t[0])+'</td><td class="n">'+t[1]+' 位</td></tr>').join('')+
+      '<tr class="sum"><td>合計</td><td class="n">'+(F.totalAll||'')+' 位</td></tr></tbody></table>';
+    h+='<ul>'+(F.dims||[]).map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul>';
+  }else{
+    h+='<ul>'+(G.lines||[]).map(l=>'<li>'+fnBul(l)+'</li>').join('')+'</ul>';
+    if((G.offPlan||[]).length)
+      h+='<div class="fpoff"><b>不在這張圖上</b><ul>'+
+         G.offPlan.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul></div>';
+  }
+  document.querySelector('#floorplan .fpside').innerHTML=h;
+  document.querySelectorAll('#floorplan .fpnav button').forEach(b=>b.classList.toggle('on',b.dataset.g===key));
+}
+
+function renderFloorplan(){
+  const s=$('#floorplan'); const F=(D&&D.floorplan)||null;
+  if(!F){ s.innerHTML='<div class="loading">平面圖資料未載入</div>'; return; }
+  let h='<h2 class="sec">'+esc(F.title||'壇場平面圖')+'</h2>';
+  h+='<p class="lead">點一組，只亮那一組現場要顧的位置；右欄是該組的查核點。</p>';
+  h+='<div class="fpnav">'+Object.keys(F.groups||{}).map(k=>
+      '<button data-g="'+k+'">'+esc(F.groups[k].name)+'</button>').join('')+'</div>';
+  h+='<div class="fpwrap"><div class="card"><svg id="fpsvg" viewBox="0 0 1000 1420"></svg></div>'+
+     '<div class="card fpside"></div></div>';
+  h+='<p class="note" style="margin-top:16px">'+esc(F.note||'')+'</p>';
+  s.innerHTML=h;
+  fpBuild(document.getElementById('fpsvg'),F);
+  s.querySelectorAll('.fpnav button').forEach(b=>b.onclick=()=>fpApply(b.dataset.g));
+  fpApply('all');
 }
 
 function renderDepts(){

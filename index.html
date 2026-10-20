@@ -193,6 +193,63 @@
   .rn-line:last-child{border-bottom:0}
   .rn-line .rl{display:inline-block;background:#f6e3c4;color:#7a5a12;border:1px solid var(--gold-soft);padding:1px 9px;border-radius:7px;margin-right:6px;font-size:13px}
   .rn-warn{font-size:13.5px;color:#8a3a12;background:#fbeee0;border:1px solid #eec7ad;border-radius:8px;padding:8px 12px;margin-top:8px}
+
+  /* ── 壇場平面圖 ── */
+  .fpwrap{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}
+  @media(max-width:980px){.fpwrap{grid-template-columns:1fr}}
+  .fpnav{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 16px}
+  .fpnav button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--muted);
+    font-family:inherit;font-size:15px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+  .fpnav button:hover{color:var(--ink);border-color:var(--gold-soft)}
+  .fpnav button.on{background:var(--fphit,#7a5a12);border-color:var(--fphit,#7a5a12);color:#fff}
+  #fpsvg{width:100%;height:auto;display:block}
+  .fpside h3{margin:2px 0 10px;font-size:19px;color:var(--fphit,#7a5a12)}
+  .fpside ul{margin:0;padding-left:1.15em}
+  .fpside li{margin:8px 0;font-size:14.5px}
+  .fpside li::marker{color:var(--fphit,#7a5a12)}
+  .fpoff{margin-top:14px;background:#fbf3e6;border:1px solid #ecd9b4;border-left:4px solid var(--gold);
+    border-radius:10px;padding:10px 12px;font-size:13.5px}
+  .fpoff ul{margin:6px 0 0;padding-left:1.1em}
+  .fptot{width:100%;border-collapse:collapse;margin:2px 0 12px}
+  .fptot td{padding:7px 3px;border-bottom:1px dashed var(--line);font-size:15px}
+  .fptot td.n{text-align:right;font-weight:800;color:var(--maroon)}
+  .fptot tr.sum td{border-bottom:0;border-top:2px solid var(--line);font-weight:800}
+  .hallbox{fill:#fffdf8;stroke:#c9bca0;stroke-width:1.6}
+  .bluewall{fill:#efe4c6;stroke:#d9c892;stroke-width:1}
+  .fpstage{fill:#efe8da;stroke:#b3a88a;stroke-width:1.4}
+  .stageT{font-size:21px;font-weight:800;fill:#5a4a2e;text-anchor:middle;letter-spacing:4px}
+  .xiaozaiBox{fill:#f3e7d2;stroke:#c2ad84;stroke-width:1.2}
+  .fpbox{fill:#f7f2e6;stroke:#c2b391;stroke-width:1.2}
+  .boxLite{fill:#faf6ec;stroke:#d5c8ae;stroke-width:1}
+  .seatblk{fill:#f4efe2;stroke:#c7b997;stroke-width:1.2}
+  .wedge{fill:#f7f1e3;stroke:#c9b992;stroke-width:1.2}
+  .wedgeIn{fill:#efe6d2;stroke:#bfae86;stroke-width:1.2}
+  .wedgeBox{fill:#f3ead8;stroke:#c3b089;stroke-width:1.2}
+  .octa{fill:#e8dcc2;stroke:#9c8757;stroke-width:1.8}
+  .octaIn{fill:#f6efe0;stroke:#b7a375;stroke-width:1.1}
+  .octaT{font-size:15px;font-weight:800;fill:#5a4a2e;text-anchor:middle}
+  .octaDir{font-size:10.5px;fill:#8a7a5c;text-anchor:middle}
+  .dotXd{fill:#b8860b;opacity:.75}
+  .aisle{fill:#f0e9d9;stroke:#c7b997;stroke-width:1;stroke-dasharray:4 3}
+  .door,.entry{fill:#cdb77e}
+  .svc{fill:#f7f2e6;stroke:#c2b391;stroke-width:1.1}
+  .altar{fill:#efe2cd;stroke:#b39a6a;stroke-width:1.4}
+  .sep{stroke:#d8cab0;stroke-width:1;stroke-dasharray:6 4}
+  .fq{fill:#fff;stroke:#9c8757;stroke-width:1.2}
+  .fqT{font-size:8px;fill:#6a5a3c;text-anchor:middle;dominant-baseline:middle}
+  .compass{font-size:22px;font-weight:800;fill:#8a7a5c;text-anchor:middle}
+  .fpdim{font-size:12px;fill:#9b8c70}
+  .tagM{font-size:13.5px;fill:#4a3d28;text-anchor:middle;font-weight:700}
+  .tagS2{font-size:12px;fill:#5a4d35;text-anchor:middle}
+  .tagXS{font-size:10.5px;fill:#8a7a5c;text-anchor:middle}
+  .wedgeT{font-size:11.5px;fill:#4a3d28;text-anchor:middle;font-weight:700}
+  g.lay{transition:opacity .18s}
+  g.lay.dim,path.wedge.dim{opacity:.22}
+  g.lay.hit .seatblk,g.lay.hit .svc,g.lay.hit .fpbox,g.lay.hit .altar,g.lay.hit .boxLite,
+  g.lay.hit .aisle,g.lay.hit .octa,g.lay.hit .xiaozaiBox,g.lay.hit .fpstage,
+  g.lay.hit .hallbox,g.lay.hit .bluewall,g.lay.hit .wedgeBox{stroke:var(--fphit);stroke-width:2.4}
+  g.lay.hit .entry,g.lay.hit .door,g.lay.hit .dotXd{fill:var(--fphit)}
+  path.wedge.hit{stroke:var(--fphit);stroke-width:2.4}
   /* 全組時間表 matrix */
   .mtx-hint{font-size:13px;color:var(--gold);font-weight:700;margin-left:6px}
   .matrix-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
@@ -285,6 +342,7 @@
     <button data-tab="handoff">跨組串連矩陣</button>
     <button data-tab="notify">知會協定</button>
     <button data-tab="coop">壇口協作</button>
+    <button data-tab="floorplan">壇場平面圖</button>
     <button data-tab="depts">各組 SOP</button>
     <button data-tab="channels">通訊頻道</button>
     <button data-tab="manpower">人力編制</button>
@@ -300,6 +358,7 @@
   <section class="tab" id="handoff"></section>
   <section class="tab" id="notify"></section>
   <section class="tab" id="coop"></section>
+  <section class="tab" id="floorplan"></section>
   <section class="tab" id="depts"></section>
   <section class="tab" id="channels"></section>
   <section class="tab" id="manpower"></section>
@@ -307,7 +366,7 @@
   <div class="foot" id="foot"></div>
 </div>
 
-<script src="payload.js?v=1564455241"></script>
+<script src="payload.js?v=939903170a"></script>
 <script>
 (function(){
   var KEY='baoyan_ly_sop_pw';
@@ -338,7 +397,7 @@
     window.MANPOWER=data.MANPOWER;
     window.ZONGCEHUA=data.ZONGCEHUA;
     var s=document.createElement('script');
-    s.src='app.js?v=1564455241';
+    s.src='app.js?v=939903170a';
     s.onload=function(){
       gate.remove();
       document.body.classList.remove('locked');
