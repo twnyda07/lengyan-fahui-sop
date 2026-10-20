@@ -423,12 +423,26 @@ function fpBuild(svg,F){
   const gXP=g('xiepaiwei');
   [310,440].forEach(x=>{gXP.appendChild(fpEl('rect',{x:x,y:sy+86,width:110,height:40,rx:4,class:'svc'}));
     gXP.appendChild(fpEl('text',{x:x+55,y:sy+111,class:'tagS2'},L.xiepaiwei));});
+  const gCGZ=g('chuangongzhuo');
+  [[150,sy+14],[640,sy+14]].forEach(p=>{
+    gCGZ.appendChild(fpEl('rect',{x:p[0],y:p[1]-30,width:210,height:24,rx:3,class:'altar'}));
+    gCGZ.appendChild(fpEl('text',{x:p[0]+105,y:p[1]-13,class:'tagM'},L.chuangongzhuo));});
+  const gDC=g('dacaiqu');
+  [[92,sy+134,200,'wenchuang'],[700,sy+134,230,'futianzx']].forEach(p=>{
+    gDC.appendChild(fpEl('rect',{x:p[0],y:p[1],width:p[2],height:38,rx:4,class:'wedgeBox'}));
+    gDC.appendChild(fpEl('text',{x:p[0]+p[2]/2,y:p[1]+17,class:'tagS2'},L[p[3]]));
+    gDC.appendChild(fpEl('text',{x:p[0]+p[2]/2,y:p[1]+32,class:'tagXS'},L.dacai));});
+  const gXMS=g('xumishan');
+  gXMS.appendChild(fpEl('rect',{x:452,y:sy+134,width:120,height:38,rx:4,class:'boxLite'}));
+  gXMS.appendChild(fpEl('text',{x:512,y:sy+158,class:'tagS2'},L.xumishan));
   const gEX=g('expo');
   gEX.appendChild(fpEl('rect',{x:580,y:sy+86,width:350,height:40,rx:4,class:'boxLite'}));
   gEX.appendChild(fpEl('text',{x:755,y:sy+104,class:'tagS2'},L.expo));
   gEX.appendChild(fpEl('text',{x:755,y:sy+120,class:'tagXS'},L.expoSub));
 }
 
+// 平面圖右欄不用 fnBul：它會把「13:00」當成「標題：子項」拆開
+function fpFmt(t){return esc(String(t)).replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');}
 function fpApply(key){
   const F=(D&&D.floorplan)||{}; const G=(F.groups||{})[key]; if(!G) return;
   const svg=document.getElementById('fpsvg'); if(!svg) return;
@@ -447,7 +461,7 @@ function fpApply(key){
       '<tr class="sum"><td>合計</td><td class="n">'+(F.totalAll||'')+' 位</td></tr></tbody></table>';
     h+='<ul>'+(F.dims||[]).map(d=>'<li>'+esc(d)+'</li>').join('')+'</ul>';
   }else{
-    h+='<ul>'+(G.lines||[]).map(l=>'<li>'+fnBul(l)+'</li>').join('')+'</ul>';
+    h+='<ul>'+(G.lines||[]).map(l=>'<li>'+fpFmt(l)+'</li>').join('')+'</ul>';
     if((G.offPlan||[]).length)
       h+='<div class="fpoff"><b>不在這張圖上</b><ul>'+
          G.offPlan.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul></div>';
@@ -463,7 +477,7 @@ function renderFloorplan(){
   h+='<p class="lead">點一組，只亮那一組現場要顧的位置；右欄是該組的查核點。</p>';
   h+='<div class="fpnav">'+Object.keys(F.groups||{}).map(k=>
       '<button data-g="'+k+'">'+esc(F.groups[k].name)+'</button>').join('')+'</div>';
-  h+='<div class="fpwrap"><div class="card"><svg id="fpsvg" viewBox="0 0 1000 1420"></svg></div>'+
+  h+='<div class="fpwrap"><div class="card"><svg id="fpsvg" viewBox="0 0 1000 1480"></svg></div>'+
      '<div class="card fpside"></div></div>';
   h+='<p class="note" style="margin-top:16px">'+esc(F.note||'')+'</p>';
   s.innerHTML=h;
