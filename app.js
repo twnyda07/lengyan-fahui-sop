@@ -93,6 +93,15 @@ function renderOverview(){
   if(R){
     h += `<div class="card" style="margin-bottom:22px;border-color:var(--plum)"><div class="dept-h"><span class="codebadge" style="background:linear-gradient(135deg,#6b2c4e,#8e3d66)">程</span><h3>每日流程表（總策劃試算表・權威時刻表）</h3></div>`;
     if(R.note) h += `<div class="meta">${esc(R.note)}</div>`;
+    // 啟建日開場（Day1 專屬，排在共通表之前）
+    const OP=R.opening;
+    if(OP){
+      h += `<div class="rn-warn" style="margin:10px 0 14px"><b>${esc(OP.title||'')}</b></div>`;
+      h += `<div style="overflow-x:auto"><table class="tbl" style="min-width:420px"><thead><tr><th style="width:140px">時間</th><th>啟建日開場</th></tr></thead><tbody>`;
+      (OP.rows||[]).forEach(r=>{ h += `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`; });
+      h += `</tbody></table></div>`;
+      if(OP.src) h += `<div class="meta" style="margin:6px 0 16px">來源：${esc(OP.src)}</div>`;
+    }
     h += `<div style="overflow-x:auto"><table class="tbl" style="min-width:420px"><thead><tr><th style="width:140px">時間</th><th>內壇流程（三天共通）</th></tr></thead><tbody>`;
     (R.common||[]).forEach(r=>{ h += `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`; });
     h += `</tbody></table></div>`;
